@@ -1,0 +1,124 @@
+// todoList.js
+class TodoList {
+	constructor() {
+		this.todoInput = document.querySelector('.todo-input')
+		this.alertInfo = document.querySelector('.alert-info')
+		this.addBtn = document.querySelector('.add-btn')
+		this.ulList = document.querySelector('.todo-list ul')
+		this.allTasks = document.getElementsByTagName('li')
+		this.idNumber = 0
+		this.popup = document.querySelector('.popup')
+		this.popupInfo = document.querySelector('.popup-info')
+		this.editedTodo = null
+		this.popupInput = document.querySelector('.popup-input')
+		this.addPopupBtn = document.querySelector('.accept')
+		this.closeTodoBtn = document.querySelector('.cancel')
+	}
+
+	addNewTask() {
+		if (this.todoInput.value !== '' && (this.todoInput.value).trim()) {
+			this.idNumber++
+			const newTask = document.createElement('li')
+			newTask.innerText = this.todoInput.value
+			newTask.setAttribute('id', `todo-${this.idNumber}`)
+
+			this.ulList.appendChild(newTask)
+			this.createToolsArea(newTask)
+
+			this.todoInput.value = ''
+			this.alertInfo.innerText = ''
+		} else {
+			this.alertInfo.innerText = 'Wpisz treść zadania!'
+		} 
+	}
+
+	enterCheck(e) {
+		if (e.key === 'Enter') {
+			this.addNewTask()
+		}
+	}
+
+	createToolsArea(newTask) {
+		const toolsPanel = document.createElement('div');
+		toolsPanel.classList.add('tools');
+		newTask.appendChild(toolsPanel);
+
+		const completeBtn = document.createElement('button');
+		completeBtn.classList.add('complete');
+		completeBtn.innerHTML = '<i class="fas fa-check"></i>';
+		const editBtn = document.createElement('button');
+		editBtn.classList.add('edit');
+		editBtn.innerHTML = '<i class="fa-solid fa-pencil"></i>';
+		const deleteBtn = document.createElement('button');
+		deleteBtn.classList.add('delete');
+		deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+
+		toolsPanel.append(completeBtn, editBtn, deleteBtn)
+	}
+
+	checkClick(e) {
+		if (e.target.classList.value !== '') {
+			if(e.target.closest('button').classList.contains('complete')) {
+				e.target.closest('li').classList.toggle('completed');
+				e.target.closest('button').classList.toggle('completed')
+			} else if (e.target.closest('button').classList.contains('edit')) {
+				this.editTask(e);
+			} else if (e.target.closest('button').classList.contains('delete')) {
+				this.deleteTask(e);
+			}
+		}
+	}
+
+	editTask(e) {
+		const oldTodo = e.target.closest('li').id;
+		this.editedTodo = document.getElementById(oldTodo);
+		this.popupInput.value = this.editedTodo.firstChild.textContent;
+		this.popup.style.display = 'flex';
+	}
+
+	changeTodo() {
+		if (this.popupInput.value !== '') {
+			this.editedTodo.firstChild.textContent = this.popupInput.value;
+			this.popup.style.display = 'none';
+			this.popupInfo.innerText = '';
+		} else {
+			this.popupInfo.innerText = 'Musisz podać jakąś treść!'
+		}
+	}
+
+	deleteTask(e) {
+		const deleteTodo = e.target.closest('li');
+		deleteTodo.remove();
+
+		if(this.allTasks.length === 0) {
+			this.alertInfo.textContent = 'Brak zadań na liście.'
+		}
+	}
+
+	closePopup() {
+		this.popup.style.display = 'none';
+		this.popupInfo.innerText = '' ;
+	}
+
+	prepareDOMEvents() {
+		this.addBtn.addEventListener('click', this.addNewTask.bind(this))
+		this.todoInput.addEventListener('keyup', this.enterCheck.bind(this))
+		this.ulList.addEventListener('click', this.checkClick.bind(this))
+		this.addPopupBtn.addEventListener('click', this.changeTodo.bind(this))
+		this.closeTodoBtn.addEventListener('click', this.closePopup.bind(this))
+	}
+
+	init() {
+		this.prepareDOMEvents()
+	}
+}
+
+export default TodoList;
+
+// index.js
+import TodoList from './todoList.js';
+
+document.addEventListener('DOMContentLoaded', function() {
+	const todoList = new TodoList()
+	todoList.init()
+})
